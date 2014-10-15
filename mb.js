@@ -28,9 +28,9 @@ function Mandelbrot(obj) {
         var self = this;
         var old = self[local][k];
         this[local][k] = val;
-        _.each(self[setCbk][k], function (c) {
-          c(self[local][k], old);
-        });
+        _.reduce(self[setCbk][k], function (lastResult, callback) {
+          return callback(self[local][k], old, lastResult, k);
+        }, old);
       }
     };
   });
