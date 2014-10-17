@@ -73,7 +73,7 @@ _.each([index, (index + 1) % data.length, index], function (i) {
   console.log(d.one);
 
   'Add Callback'.log();
-  dataObj.prototype.$.one.push(function (n, o) {
+  dataObj.prototype['@'].one.push(function (n, o) {
     console.log('Update Callback');
     console.log(n, o);
   });
