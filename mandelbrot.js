@@ -7,13 +7,14 @@ String.prototype.log = function () {
 
 
 function Mandelbrot(obj) {
-  var keys = _.keys(obj);
-  var newObj = function (o) { this._ = o; };
   
   var local = '~',
       setCbk = '@',
       touch = '!',
       update = '^';
+  
+  var keys = _.keys(obj);
+  var newObj = function (o) { this[local] = o; };
   
   //Setup local prop reference
   newObj.prototype[local] = _.object(keys, []);
@@ -40,47 +41,3 @@ function Mandelbrot(obj) {
   
   return newObj;
 }
-
-var dataObj;
-var data = _.chain(_.range(5))
-.map(function () {
-  return {
-    one: _.random(10,100),
-    two: _.random(0,5),
-    three: _.random(1000, 9999)
-  };
-})
-.tap(function (l) {
-  dataObj =  Mandelbrot(l[0]);
-})
-.map(function (d) {
-  return new dataObj(d);
-})
-.value();
-
-var index = _.random(0,data.length - 1);
-_.each([index, (index + 1) % data.length, index], function (i) {
-  ('--Index' + i).log();
-  var d = data[i];
-  var newVal;
-  'Show value'.log();
-  console.log(d.one);
-  
-  newVal = _.random(100);
-  ('Set value: ' + newVal).log();
-  d.one = newVal;
-  'Confirm value'.log();
-  console.log(d.one);
-
-  'Add Callback'.log();
-  dataObj.prototype['@'].one.push(function (n, o) {
-    console.log('Update Callback');
-    console.log(n, o);
-  });
-  
-  newVal = _.random(100);
-  ('Set value: ' + newVal).log();
-  d.one = newVal;
-  'Confirm value'.log();
-  console.log(d.one);
-});
