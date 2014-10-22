@@ -30,7 +30,7 @@ var Mandelbrot = (function(_){
     //Create the anonmous function that will be the constructor
     var anon = function (o) {
       this[localData] = o;
-      this[watchTracking] = initialise(props, function() { return { update: 0, cache: 0 }; });
+      this[watchTracking] = initialise(props, function() { return { update: 1, cache: 0 }; });
     };
     
     //With the contructor created we build out the prototype... dynamicly
@@ -49,10 +49,10 @@ var Mandelbrot = (function(_){
           
           //else check if the last update is less than the last cached result time
           var watch = this[watchTracking][prop];
-          if(watch.update >= watch.cache) {
+          if(watch.update > watch.cache) {
             //Run the function to calculate the value then cache it locally
-            this[localData][prop] = this[calcFunction](this[localData][prop]);
-            watch.cache = Date.now();
+            this[localData][prop] = calcFunk.call(this, this[localData][prop]);
+            watch.cache = watch.update;
           }
           
           //Return the cached data
@@ -62,10 +62,12 @@ var Mandelbrot = (function(_){
           var self = this,
               oValue = self[localData][prop];
           self[localData][prop] = _.reduce(self[callbackLists][prop], function(lValue, callback) {
-            return callback(nValue, oValue, lValue, prop, self);
+            return callback.call(self, nValue, oValue, lValue, prop);
           }, nValue);
           
-          this[watchTracking].update = Date.now();
+          var watch = this[watchTracking][prop];
+          //Think about what should happen here when we get to very large numbers
+          if(watch.update <= watch.cache) watch.update++;
         }
       });
     });

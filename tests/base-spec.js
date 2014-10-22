@@ -43,7 +43,6 @@ describe('Mandelbrot is a wrapper for objects.', function() {
       _.each(_.keys(book),function (key) {
         it(['the value of ', key, ' should be: ', newBook[key], '.'].join(''), function () {
           mBook[key] = newBook[key];
-          console.log(mBook[key], newBook[key]);
           expect(mBook[key]).toBe(newBook[key]);
         });
       });
@@ -81,6 +80,74 @@ describe('Mandelbrot is a wrapper for objects.', function() {
           expect(spyBook[key].calls.count()).toEqual(2);
         });
       });
+    });
+  });
+  
+  describe('Calculated values can also be setup', function () {
+    var box = {
+      width: 25,
+      height: 15,
+      area: 0
+    };
+    
+    var boxObj = Mandelbrot(box);
+    
+    //Configure setter for width
+    boxObj.prototype['@'].width.push(function(nValue) {
+      this.area = 0;
+      return nValue;
+    });
+    
+    //Configure setter for height
+    boxObj.prototype['@'].height.push(function(nValue) {
+      this.area = 0;
+      return nValue;
+    });
+    
+    //Configure calculated function for area
+    var spy = jasmine.createSpy('AreaSpy');
+    boxObj.prototype['^'].area = function() {
+      spy();
+      return this.width * this.height;
+    };
+    
+    var mBox = new boxObj(box);
+    
+    
+    it('So for area should equal width by height', function () {
+      expect(mBox.area).toEqual(mBox.width * mBox.height);
+      expect(spy.calls.count()).toEqual(1);
+    });
+    
+    it('Changing the value of width will cause the area to change', function () {
+      mBox.width = 50;
+      expect(mBox.area).toEqual(mBox.width * mBox.height);
+      expect(spy.calls.count()).toEqual(2);
+    });
+    
+    it('Calling area multiple times returns a cached value', function () {
+      expect(mBox.area).toEqual(mBox.width * mBox.height);
+      expect(mBox.area).toEqual(mBox.width * mBox.height);
+      expect(mBox.area).toEqual(mBox.width * mBox.height);
+      expect(spy.calls.count()).toEqual(2);
+    });
+    
+    it('Only when area is called after with and height have been set will it run', function () {
+      mBox.width = 5;
+      mBox.height = 10;
+      expect(spy.calls.count()).toEqual(2);
+      expect(mBox.area).toEqual(mBox.width * mBox.height);
+      expect(spy.calls.count()).toEqual(3);
+      
+      mBox.width = 42;
+      mBox.height = 9;
+      mBox.width = 21;
+      mBox.height = 78;
+      mBox.width = 19;
+      expect(mBox.area).toEqual(mBox.width * mBox.height);
+      expect(spy.calls.count()).toEqual(4);
+      expect(mBox.area).toEqual(mBox.width * mBox.height);
+      expect(spy.calls.count()).toEqual(4);
     });
   });
 });
