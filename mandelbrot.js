@@ -1,43 +1,71 @@
-/*global _, setInterval, clearTimeout, clearInterval */
-/*jshint -W116 */
+/* global _ */
+/* jshint -W116 */
 console.clear();
 String.prototype.log = function () {
   console.log(this.toString());
 };
 
-
-function Mandelbrot(obj) {
+var Mandelbrot = (function(_){
+  var localData = '~',
+      callbackLists = '@',
+      calcFunction = '^',
+      watchTracking = '!';
   
-  var local = '~',
-      setCbk = '@',
-      touch = '!',
-      update = '^';
+  function initialise(props, initFunk) {
+    return _.reduce(props, function (m, d, i) {
+      m[i] = initFunk(m, d, i);
+      return m;
+    }, {});
+  }
   
-  var keys = _.keys(obj);
-  var newObj = function (o) { this[local] = o; };
+  function M (that, data) {
+    
+  }
   
-  //Setup local prop reference
-  newObj.prototype[local] = _.object(keys, []);
-  newObj.prototype[setCbk] = _.object(keys, _.map(keys, function () {return [];}));
-  
-  var getterAndSetters = _.map(keys, function (k) {
-    return {
-      get: function () {
-        return this[local][k];
-      },
-      set: function (val) {
-        var self = this;
-        var old = self[local][k];
-        this[local][k] = val;
-        _.reduce(self[setCbk][k], function (lastResult, callback) {
-          return callback(self[local][k], old, lastResult, k);
-        }, old);
-      }
+  function Mandelbrot(obj) {
+    //List all the properties on this object
+    var props = _.keys(obj);
+    
+    //#Anonymous Object
+    //Create the anonmous function that will be the constructor
+    var anon = function (o) {
+      this[localData] = o;
+      this[callbackLists] = initialise(o, function() { return []; });
+      this[calcFunction] = initialise(o, function() { return null; });
+      this[watchTracking] = initialise(o, function() { return { update: 0, cache: 0 }; });
     };
-  });
+    
+    //With the contructor created we build out the prototype... dynamicly
+    _.each(props, function (prop) {
+      Object.defineProperty(anon.prototype, prop, {
+        enumerable:false,
+        get: function() {
+          var calcFunk = this[calcFunction][prop];
+          
+          //If no calculation funciton is defined then return the local data
+          if(!_.isFunction(calcFunk)) return this[localData][prop];
+          
+          //else check if the last update is less than the last cached result time
+          var watch = this[watchTracking][prop];
+          if(watch.update >= watch.cache) {
+            //Run the function to calculate the value then cache it locally
+            this[localData][prop] = this[calcFunction](this[localData][prop]);
+          }
+          
+          //Return the cached data
+          return this[localData][prop];
+        },
+        set: function(nValue) {
+          var self = this,
+              oValue = self[localData][prop];
+          self[localData][prop] = _.reduce(self[callbackLists], function(lValue, callback) {
+            return callback(nValue, oValue, lValue, prop, self);
+          }, undefined);
+        }
+      });
+    });
+    return anon;
+  }
   
-  var props = _.object(keys, getterAndSetters);
-  Object.defineProperties(newObj.prototype, props);
-  
-  return newObj;
-}
+  return Mandelbrot;
+})(_);
