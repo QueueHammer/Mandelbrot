@@ -13,7 +13,7 @@ var Mandelbrot = (function(_){
   
   function initialise(props, initFunk) {
     return _.reduce(props, function (m, d, i) {
-      m[i] = initFunk(m, d, i);
+      m[d] = initFunk(m, d, i);
       return m;
     }, {});
   }
@@ -30,15 +30,17 @@ var Mandelbrot = (function(_){
     //Create the anonmous function that will be the constructor
     var anon = function (o) {
       this[localData] = o;
-      this[callbackLists] = initialise(o, function() { return []; });
-      this[calcFunction] = initialise(o, function() { return null; });
-      this[watchTracking] = initialise(o, function() { return { update: 0, cache: 0 }; });
+      this[watchTracking] = initialise(props, function() { return { update: 0, cache: 0 }; });
     };
     
     //With the contructor created we build out the prototype... dynamicly
+    
+    anon.prototype[callbackLists] = initialise(props, function() { return []; });
+    anon.prototype[calcFunction] = initialise(props, function() { return null; });
+    
+    //Then each of the existing props
     _.each(props, function (prop) {
       Object.defineProperty(anon.prototype, prop, {
-        enumerable:false,
         get: function() {
           var calcFunk = this[calcFunction][prop];
           
@@ -50,6 +52,7 @@ var Mandelbrot = (function(_){
           if(watch.update >= watch.cache) {
             //Run the function to calculate the value then cache it locally
             this[localData][prop] = this[calcFunction](this[localData][prop]);
+            watch.cache = Date.now();
           }
           
           //Return the cached data
@@ -58,9 +61,11 @@ var Mandelbrot = (function(_){
         set: function(nValue) {
           var self = this,
               oValue = self[localData][prop];
-          self[localData][prop] = _.reduce(self[callbackLists], function(lValue, callback) {
+          self[localData][prop] = _.reduce(self[callbackLists][prop], function(lValue, callback) {
             return callback(nValue, oValue, lValue, prop, self);
-          }, undefined);
+          }, nValue);
+          
+          this[watchTracking].update = Date.now();
         }
       });
     });

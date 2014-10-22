@@ -43,6 +43,7 @@ describe('Mandelbrot is a wrapper for objects.', function() {
       _.each(_.keys(book),function (key) {
         it(['the value of ', key, ' should be: ', newBook[key], '.'].join(''), function () {
           mBook[key] = newBook[key];
+          console.log(mBook[key], newBook[key]);
           expect(mBook[key]).toBe(newBook[key]);
         });
       });
@@ -63,7 +64,7 @@ describe('Mandelbrot is a wrapper for objects.', function() {
       return spy;
     }));
     
-    describe('So callback can be chained to each property though the prototype:', function () {
+    describe('So callbacks can be chained to each property though the prototype:', function () {
       _.each(keys,function (key) {
         it(['When setting the prop ', key, ' on "book" it\'s callback will be called.'].join(''), function () {
           mBook[key] = newBook[key];
