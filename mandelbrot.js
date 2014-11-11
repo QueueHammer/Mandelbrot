@@ -18,9 +18,33 @@ var Mandelbrot = (function(_){
     }, {});
   }
   
-  function M (that, data) {
+  
+  /*
+  Current Usage:
+  setter
+  bookClass.prototype['@'][key].push(spy);
+  getter
+  boxObj.prototype['^'].area
+  
+  What do i want...
+  class.M.onSet.prop.push();
+  class.M.onGet.prop.calcFunk()
+  class.M.add
+  
+  M can't contain state since it's on the prototype
+  onSet has a reference to this.prototype and is a getter
+  onGet is getter as well
+    null will remove calcFunction
     
-  }
+  Should be an improvement
+    
+  Other thoughs.
+  
+  M.create()
+  M.otherMagic()
+  M.squatter === anything use M before
+  
+  */
   
   function Mandelbrot(obj) {
     //List all the properties on this object
