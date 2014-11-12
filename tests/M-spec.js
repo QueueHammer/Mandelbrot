@@ -49,7 +49,7 @@ describe('Mandelbrot is a wrapper for objects.', function() {
     var keys = _.keys(book);
     var spyBook = _.object(keys, _.map(keys, function (key) {
       var spy = jasmine.createSpy(key + 'Spy');
-      bookClass.prototype['@'][key].push(spy);
+      bookClass.M.onSet[key].push(spy);
       return spy;
     }));
     
@@ -64,7 +64,7 @@ describe('Mandelbrot is a wrapper for objects.', function() {
     describe('Because it\'s on the prototpye, calling another instace will call it again:', function () {
       _.each(keys,function (key) {
         var spy = jasmine.createSpy(key + 'Spy');
-        bookClass.prototype['@'][key].push(spy);
+        bookClass.M.onSet[key].push(spy);
         it(['When setting the prop ', key, ' on "otherBook"it\'s callback will be called.'].join(''), function () {
           otherBook[key] = newBook[key];
           expect(spyBook[key].calls.count()).toEqual(2);
@@ -83,20 +83,20 @@ describe('Mandelbrot is a wrapper for objects.', function() {
     var boxObj = M.create(box);
     
     //Configure setter for width
-    boxObj.prototype['@'].width.push(function(nValue) {
+    boxObj.M.onSet.width.push(function(nValue) {
       this.area = 0;
       return nValue;
     });
     
     //Configure setter for height
-    boxObj.prototype['@'].height.push(function(nValue) {
+    boxObj.M.onSet.height.push(function(nValue) {
       this.area = 0;
       return nValue;
     });
     
     //Configure calculated function for area
     var spy = jasmine.createSpy('AreaSpy');
-    boxObj.prototype['^'].area = function() {
+    boxObj.M.onGet.area = function() {
       spy();
       return this.width * this.height;
     };
