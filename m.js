@@ -9,14 +9,6 @@ var M = (function (squatter) {
       calcFunction = '^',
       watchTracking = '!';
   
-  //##An initilizer
-  function initialise(props, initFunk) {
-    return _.reduce(props, function (m, d, i) {
-      m[d] = initFunk(m, d, i);
-      return m;
-    }, {});
-  }
-  
   //#Manelbrot  
   function Mandelbrot(proto) {
     return {
@@ -86,6 +78,14 @@ var M = (function (squatter) {
     //List all the properties on this object
     var props = _.keys(obj);
     
+    //Initilizer
+    function initialise(props, initFunk) {
+      return _.reduce(props, function (m, d, i) {
+        m[d] = initFunk(m, d, i);
+        return m;
+      }, {});
+    }
+    
     //#Anonymous Object
     //Create the anonmous function that will be the constructor
     var anon = function (o) {
@@ -94,6 +94,12 @@ var M = (function (squatter) {
         return { cache: false }; 
       });
     };
+    
+    //Support the prototype chain
+    var proto = Object.getPrototypeOf(obj);
+    anon.prototype = proto !== Object.getPrototypeOf({}) ?
+      proto :
+      {};
     
     //Functional programming at it's best
     anon.M = Mandelbrot(anon.prototype);
