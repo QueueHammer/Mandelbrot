@@ -78,7 +78,7 @@ var M = (function (squatter) {
     //List all the properties on this object
     var props = _.keys(obj);
     
-    //Initilizer
+    //##Initilizer
     function initialise(props, initFunk) {
       return _.reduce(props, function (m, d, i) {
         m[d] = initFunk(m, d, i);
@@ -86,7 +86,7 @@ var M = (function (squatter) {
       }, {});
     }
     
-    //#Anonymous Object
+    //##Anonymous Object
     //Create the anonmous function that will be the constructor
     var anon = function (o) {
       this[localData] = o;
@@ -95,17 +95,22 @@ var M = (function (squatter) {
       });
     };
     
-    //Support the prototype chain
+    //##Support the prototype chain
     var proto = Object.getPrototypeOf(obj);
     anon.prototype = proto !== Object.getPrototypeOf({}) ?
       proto :
       {};
     
-    //Functional programming at it's best
+    //##Functional programming at it's best
     anon.M = Mandelbrot(anon.prototype);
     _.each(props, anon.M.add);
     
     return anon;
+  };
+  
+  //#Just return a new instance of the object wrapped in MB
+  lib.wrap = function (obj) {
+    return new this.create(obj);
   };
   
   return lib;
